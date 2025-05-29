@@ -141,7 +141,7 @@ export default function HomeScreen() {
       {/* MENU LATERAL */}
       <Actionsheet isOpen={isOpen} onClose={onClose}>
         <Actionsheet.Content bg={colors.card} borderTopRadius="xl" py={4} maxHeight="70%">
-          <ScrollView w="100%" showsVerticalScrollIndicator={true}>
+          <ScrollView w="100%" showsVerticalScrollIndicator>
             <VStack space={3} w="100%" px={4} alignItems="center" justifyContent="center">
               <Button
                 variant="ghost"
@@ -208,13 +208,7 @@ export default function HomeScreen() {
       </Actionsheet>
 
       {/* CONTEÚDO */}
-      <ScrollView
-        flex={1}
-        px={5}
-        pt={5}
-        bg={colors.background}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView flex={1} px={5} pt={5} bg={colors.background} keyboardShouldPersistTaps="handled">
         <HStack space={3} mb={4}>
           <Input
             flex={1}

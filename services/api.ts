@@ -1,5 +1,7 @@
+import axios from 'axios';
+
 export interface CarData {
-  id?: number;          // id gerado pelo backend (Long)
+  id?: number;
   nome: string;
   modelo?: string;
   ano?: string;
@@ -7,7 +9,7 @@ export interface CarData {
   isFavorite?: boolean;
 }
 
-const API_KEY = '7631d9dc-eb1c-4a6f-ae0e-3b2009195bf8';
+const API_BASE = 'http://localhost:8080/cars';
 
 export async function fetchCarData(carName: string): Promise<CarData | null> {
   if (!carName.trim()) return null;
@@ -23,7 +25,6 @@ export async function fetchCarData(carName: string): Promise<CarData | null> {
       isFavorite: false,
     };
 
-    // Salvar no backend
     const savedCar = await postCarToBackend(car);
     return savedCar;
   } catch (error) {
@@ -46,38 +47,27 @@ async function fetchCarImage(carName: string): Promise<string | null> {
 }
 
 async function postCarToBackend(car: Omit<CarData, 'id'>): Promise<CarData> {
-  const response = await fetch('http://localhost:8080/cars/salvar', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(car),
+  const response = await axios.post<CarData>(`${API_BASE}/salvar`, car, {
+    headers: { 'Content-Type': 'application/json' },
   });
 
-  if (!response.ok) {
-    throw new Error('Erro ao salvar carro no backend');
-  }
-
-  return response.json();
+  return response.data;
 }
 
 export async function fetchAllCars(): Promise<CarData[]> {
-  const res = await fetch('http://localhost:8080/cars/listar');
-  if (!res.ok) throw new Error('Erro ao buscar carros');
-  return res.json();
+  const response = await axios.get<CarData[]>(`${API_BASE}/listar`);
+  return response.data;
 }
 
 export async function deleteCarById(id: number): Promise<void> {
-  const res = await fetch(`http://localhost:8080/cars/deletar/${id}`, {
-    method: 'DELETE',
-  });
-  if (!res.ok) throw new Error('Erro ao deletar carro');
+  await axios.delete(`${API_BASE}/deletar/${id}`);
 }
 
 export async function updateFavorite(id: number, isFavorite: boolean): Promise<CarData> {
-  const res = await fetch(`http://localhost:8080/cars/${id}/favorite?isFavorite=${isFavorite}`, {
-    method: 'PUT',
-  });
-  if (!res.ok) throw new Error('Erro ao atualizar favorito');
-  return res.json();
+  const response = await axios.put<CarData>(
+    `${API_BASE}/${id}/favorite`,
+    { isFavorite }, // corpo JSON conforme backend espera
+    { headers: { 'Content-Type': 'application/json' } }
+  );
+  return response.data;
 }

@@ -1,10 +1,9 @@
 import React from 'react';
 import { Box, Pressable, Text, Image, IconButton, HStack, useTheme } from 'native-base';
-import { Ionicons } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 export interface CarData {
-  id?: string | number; // Caso use id para controle
+  id?: string | number;
   nome: string;
   marca?: string;
   imagem: string;
@@ -34,14 +33,7 @@ export default function CarCard({
 
   return (
     <Pressable onPress={onPress} mb={4}>
-      <Box
-        bg={bgColor}
-        borderRadius="xl"
-        shadow={2}
-        p={4}
-        flexDirection="row"
-        alignItems="center"
-      >
+      <Box bg={bgColor} borderRadius="xl" shadow={2} p={4} flexDirection="row" alignItems="center">
         <Image
           source={{ uri: carData.imagem }}
           alt={carData.nome}
@@ -53,14 +45,13 @@ export default function CarCard({
           height={60}
         />
         <Box flex={1}>
-          <Text fontWeight="bold" fontSize="md" mb={1} color={colors.black}>
+          <Text fontWeight="bold" fontSize="md" mb={1} color={colors.white}>
             {carData.nome}
           </Text>
           <Text fontSize="sm" color={colors.gray['500']} mb={2}>
             {carData.marca || 'Marca desconhecida'}
           </Text>
-
-          <HStack space={2} alignItems="center" justifyContent="flex-start">
+          <HStack space={2} alignItems="center">
             <IconButton
               icon={
                 <Ionicons
@@ -75,10 +66,16 @@ export default function CarCard({
             />
             {onDelete && (
               <IconButton
-                icon={<MaterialIcons name="delete" size={24} color={colors.red['500']} />}
+                icon={
+                  <MaterialIcons
+                    name="delete"
+                    size={24}
+                    color={colors.red['500']}
+                  />
+                }
                 onPress={() => onDelete(carData)}
                 _pressed={{ bg: 'transparent' }}
-                accessibilityLabel="Deletar carro"
+                accessibilityLabel="Excluir carro"
               />
             )}
           </HStack>
