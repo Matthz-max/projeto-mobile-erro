@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   Actionsheet,
@@ -17,7 +16,6 @@ import {
   useDisclose,
   VStack,
 } from 'native-base';
-import { FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import CarCard, { CarData } from '../components/CarCard';
@@ -25,7 +23,7 @@ import { fetchCarData } from '../services/api';
 
 export default function HomeScreen() {
   const [carNameInput, setCarNameInput] = useState('');
-  const [carDataList, setCarDataList] = useState<CarData[]>([]); // ALTERAÇÃO: lista de carros
+  const [carDataList, setCarDataList] = useState<CarData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<CarData | null>(null);
@@ -77,7 +75,7 @@ export default function HomeScreen() {
         setError('Carro não encontrado');
       } else {
         setCarDataList(prev => {
-          const exists = prev.find(c => c.name === data.name);
+          const exists = prev.find(c => c.nome === data.nome);
           if (exists) return prev;
           return [...prev, data];
         });
@@ -95,9 +93,9 @@ export default function HomeScreen() {
   };
 
   const toggleFavorite = (car: CarData) => {
-    const exists = favorites.find(f => f.name === car.name);
+    const exists = favorites.find(f => f.nome === car.nome);
     if (exists) {
-      setFavorites(favorites.filter(f => f.name !== car.name));
+      setFavorites(favorites.filter(f => f.nome !== car.nome));
     } else {
       setFavorites([...favorites, car]);
     }
@@ -105,16 +103,15 @@ export default function HomeScreen() {
 
   const isFavorited = (car: CarData | null) => {
     if (!car) return false;
-    return favorites.some(f => f.name === car.name);
+    return favorites.some(f => f.nome === car.nome);
   };
 
-  // Função para deletar o carro (da lista principal, preview e favoritos)
   const handleDeleteCar = (car: CarData) => {
-    setCarDataList(prev => prev.filter(c => c.name !== car.name));
-    if (previewData && previewData.name === car.name) {
+    setCarDataList(prev => prev.filter(c => c.nome !== car.nome));
+    if (previewData && previewData.nome === car.nome) {
       setPreviewData(null);
     }
-    setFavorites(prev => prev.filter(f => f.name !== car.name));
+    setFavorites(prev => prev.filter(f => f.nome !== car.nome));
   };
 
   return (
@@ -259,7 +256,7 @@ export default function HomeScreen() {
           </Center>
         )}
 
-        {previewData && !carDataList.find(c => c.name === previewData.name) && (
+        {previewData && !carDataList.find(c => c.nome === previewData.nome) && (
           <>
             <Text mb={3} fontWeight="bold" fontSize="lg" color={colors.textPrimary}>
               Preview:
@@ -279,7 +276,7 @@ export default function HomeScreen() {
           <>
             {carDataList.map(car => (
               <CarCard
-                key={car.name}
+                key={car.id ?? car.nome}
                 carData={car}
                 onPress={() => openCarModal(car)}
                 isFavorited={isFavorited}
@@ -298,15 +295,15 @@ export default function HomeScreen() {
           <Modal.CloseButton />
           <Modal.Header bg={colors.accent} borderTopRadius="2xl">
             <Text color="white" fontWeight="bold" fontSize="lg">
-              {selectedCar?.name}
+              {selectedCar?.nome}
             </Text>
           </Modal.Header>
           <Modal.Body>
             {selectedCar ? (
               <>
                 <Image
-                  source={{ uri: selectedCar.imageUrl }}
-                  alt={selectedCar.name}
+                  source={{ uri: selectedCar.imagem }}
+                  alt={selectedCar.nome}
                   width="100%"
                   height={250}
                   borderRadius="xl"
@@ -314,7 +311,10 @@ export default function HomeScreen() {
                   resizeMode="contain"
                 />
                 <Text fontSize="md" mb={2} color={colors.textPrimary}>
-                  Marca: {selectedCar.brand || 'Desconhecida'}
+                  Modelo: {selectedCar.modelo ?? 'Desconhecido'}
+                </Text>
+                <Text fontSize="md" mb={2} color={colors.textPrimary}>
+                  Ano: {selectedCar.ano ?? 'Desconhecido'}
                 </Text>
               </>
             ) : (
@@ -323,57 +323,43 @@ export default function HomeScreen() {
               </Center>
             )}
           </Modal.Body>
-          <Modal.Footer>
-            <Button flex={1} onPress={onModalClose}>
-              Fechar
-            </Button>
-          </Modal.Footer>
         </Modal.Content>
       </Modal>
 
       {/* MODAL FAVORITOS */}
-      <Actionsheet isOpen={isFavoritesOpen} onClose={onFavoritesClose}>
-        <Actionsheet.Content
-          bg={colors.card}
-          borderTopRadius="xl"
-          py={4}
-          maxHeight="90%"
-          minHeight="60%"
-        >
-          <Text
-            fontWeight="bold"
-            fontSize="xl"
-            mb={3}
-            px={4}
-            color={colors.textPrimary}
-            alignSelf="center"
-          >
-            Favoritos ({favorites.length})
-          </Text>
-          {favorites.length === 0 ? (
-            <Center flex={1}>
-              <Text color={colors.textSecondary}>Nenhum favorito ainda.</Text>
-            </Center>
-          ) : (
-            <ScrollView w="100%" px={4}>
-              {favorites.map(car => (
-                <CarCard
-                  key={car.name}
-                  carData={car}
-                  onPress={() => {
-                    onFavoritesClose();
-                    openCarModal(car);
-                  }}
-                  isFavorited={isFavorited}
-                  onToggleFavorite={toggleFavorite}
-                  onDelete={handleDeleteCar}
-                  bgColor={colors.card}
-                />
-              ))}
-            </ScrollView>
-          )}
-        </Actionsheet.Content>
-      </Actionsheet>
+      <Modal isOpen={isFavoritesOpen} onClose={onFavoritesClose} size="full">
+        <Modal.Content bg={colors.card} maxW="90%" borderRadius="2xl" minHeight="50%">
+          <Modal.CloseButton />
+          <Modal.Header bg={colors.accent} borderTopRadius="2xl">
+            <Text color="white" fontWeight="bold" fontSize="lg">
+              Favoritos
+            </Text>
+          </Modal.Header>
+          <Modal.Body>
+            {favorites.length === 0 ? (
+              <Center>
+                <Text color={colors.textSecondary}>Nenhum carro favoritado</Text>
+              </Center>
+            ) : (
+              <ScrollView>
+                <VStack space={3}>
+                  {favorites.map(car => (
+                    <CarCard
+                      key={car.id ?? car.nome}
+                      carData={car}
+                      onPress={() => openCarModal(car)}
+                      isFavorited={isFavorited}
+                      onToggleFavorite={toggleFavorite}
+                      onDelete={handleDeleteCar}
+                      bgColor={colors.card}
+                    />
+                  ))}
+                </VStack>
+              </ScrollView>
+            )}
+          </Modal.Body>
+        </Modal.Content>
+      </Modal>
     </>
   );
 }
